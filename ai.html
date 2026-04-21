@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Whack-A-Mole! | Retro Arcade</title>
+    <style>
+        :root {
+            --grass-color: #2ecc71;
+            --dirt-color: #795548;
+            --mole-color: #5d4037;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f0f2f5;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 { color: #333; margin-bottom: 10px; }
+
+        /* Game Controls */
+        .controls {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .score-board {
+            font-size: 24px;
+            font-weight: bold;
+            color: #e74c3c;
+        }
+
+        select, button {
+            padding: 8px 16px;
+            font-size: 16px;
+            border-radius: 6px;
+            border: 1px solid #ddd;
+            cursor: pointer;
+        }
+
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            transition: background 0.2s;
+        }
+
+        button:hover { background-color: #2980b9; }
+        button:disabled { background-color: #bdc3c7; }
+
+        /* The Grid */
+        .game-grid {
+            width: 600px;
+            height: 400px;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        .hole {
+            background: var(--dirt-color);
+            border-radius: 50%;
+            position: relative;
+            overflow: hidden;
+            border: 8px solid var(--grass-color);
+            box-shadow: inset 0 10px 0 rgba(0,0,0,0.2);
+        }
+
+        /* The Mole */
+        .mole {
+            width: 100%;
+            height: 100%;
+            background: var(--mole-color);
+            position: absolute;
+            top: 100%; /* Hidden by default */
+            border-radius: 50% 50% 0 0;
+            transition: top 0.1s ease-out;
+            cursor: pointer;
+        }
+
+        .mole.up {
+            top: 20%;
+        }
+
+        /* Face details for the mole */
+        .mole::after {
+            content: '👀';
+            font-size: 30px;
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Whack-A-Mole!</h1>
+
+    <div class="controls">
+        <div class="score-board">Score: <span id="score">0</span></div>
+        
+        <div>
+            <label for="difficulty">Difficulty: </label>
+            <select id="difficulty">
+                <option value="easy">Easy (Slow)</option>
+                <option value="medium" selected>Medium (Normal)</option>
+                <option value="hard">Hard (Fast!)</option>
+                <option value="insane">Insane (Good Luck)</option>
+            </select>
+        </div>
+
+        <button id="start-btn">Start Game</button>
+    </div>
+
+    <div class="game-grid">
+        <div class="hole"><div class="mole"></div></div>
+        <div class="hole"><div class="mole"></div></div>
+        <div class="hole"><div class="mole"></div></div>
+        <div class="hole"><div class="mole"></div></div>
+        <div class="hole"><div class="mole"></div></div>
+        <div class="hole"><div class="mole"></div></div>
+    </div>
+
+    <script>
+        const holes = document.querySelectorAll('.hole');
+        const moles = document.querySelectorAll('.mole');
+        const scoreBoard = document.querySelector('#score');
+        const startBtn = document.querySelector('#start-btn');
+        const difficultySelect = document.querySelector('#difficulty');
+
+        let lastHole;
+        let timeUp = false;
+        let score = 0;
+
+        // Difficulty Settings (Min time, Max time the mole stays up)
+        const levels = {
+            easy: { min: 800, max: 1200 },
+            medium: { min: 400, max: 900 },
+            hard: { min: 200, max: 600 },
+            insane: { min: 100, max: 300 }
+        };
+
+        function randomTime(min, max) {
+            return Math.round(Math.random() * (max - min) + min);
+        }
+
+        function randomHole(holes) {
+            const idx = Math.floor(Math.random() * holes.length);
+            const hole = holes[idx];
+            if (hole === lastHole) {
+                return randomHole(holes);
+            }
+            lastHole = hole;
+            return hole;
+        }
+
+        function peep() {
+            const level = difficultySelect.value;
+            const time = randomTime(levels[level].min, levels[level].max);
+            const hole = randomHole(holes);
+            const mole = hole.querySelector('.mole');
+            
+            mole.classList.add('up');
+
+            setTimeout(() => {
+                mole.classList.remove('up');
+                if (!timeUp) peep();
+            }, time);
+        }
+
+        function startGame() {
+            score = 0;
+            scoreBoard.textContent = 0;
+            timeUp = false;
+            startBtn.disabled = true;
+            difficultySelect.disabled = true;
+            
+            peep();
+
+            // Game lasts 15 seconds
+            setTimeout(() => {
+                timeUp = true;
+                startBtn.disabled = false;
+                difficultySelect.disabled = false;
+                alert(`Game Over! Final Score: ${score}`);
+            }, 15000);
+        }
+
+        function whack(e) {
+            if(!e.isTrusted) return; // Prevent cheaters using automated clicks
+            score++;
+            this.classList.remove('up');
+            scoreBoard.textContent = score;
+        }
+
+        moles.forEach(mole => mole.addEventListener('click', whack));
+        startBtn.addEventListener('click', startGame);
+
+    </script>
+</body>
+<br>
+<br>
+<a href="FromScratch2/MyScratch.html">Back to Hobby Page</a>
+</html>

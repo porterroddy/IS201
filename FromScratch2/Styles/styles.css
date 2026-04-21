@@ -1,0 +1,43 @@
+p{
+    font-weight: bold;
+    font-size: 20px;
+}
+
+#top{
+    text-decoration: underline;
+}
+
+.emphasizeText{
+    font-style: italic;
+    color:rgb(0, 110, 255);
+}
+
+body{
+    background-color: azure;
+    font-family: Arial, Helvetica, sans-serif;
+    text-align: center;
+    border: 5px solid black;
+    margin: 50px;
+    padding: 50px;
+}
+
+ul{
+    list-style-position: inside;
+}
+
+ol{
+    list-style-position: inside;
+}
+.video-container {
+    display: flex;
+    justify-content: center;
+    margin: 20px 0;
+}
+.tableau-container {
+    width: 80%;           /* Keeps the graph from hitting the edges */
+    margin-left: auto;    /* These 'autos' center the div horizontally */
+    margin-right: auto;
+    margin-top: 50px;     /* Adds breathing room below your video or text */
+    border: 2px solid #ccc; /* Optional: adds a subtle frame around the data */
+    padding: 10px;
+}
